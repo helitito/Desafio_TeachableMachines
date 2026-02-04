@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Interruptor IA</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; transition: background 0.5s; }
+        #webcam-container { margin-top: 20px; }
+        canvas { border-radius: 10px; border: 5px solid #333; }
+        h1 { color: #555; }
+    </style>
+</head>
+<body>
+
+    <h1 id="status">Aguardando IA...</h1>
+    <button type="button" onclick="init()">Iniciar Câmera</button>
+    
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/dyhTt2Eiw/"; 
+
+        let model, webcam, labelContainer, maxPredictions;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            // Carrega o modelo
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Configura a webcam
+            const flip = true; 
+            webcam = new tmImage.Webcam(300, 300, flip);
+            await webcam.setup(); 
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+        }
+
+        async function loop() {
+            webcam.update(); 
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            
+            // Lógica de Decisão baseada na probabilidade (maior que 90%)
+            for (let i = 0; i < maxPredictions; i++) {
+                const pName = prediction[i].className;
+                const pValue = prediction[i].probability.toFixed(2);
+
+                if (pName === "Ligado" && pValue > 0.90) {
+                    document.body.style.backgroundColor = "white";
+                    document.getElementById("status").innerText = "LUZ LIGADA! 👍";
+                } 
+                else if (pName === "Desligado" && pValue > 0.90) {
+                    document.body.style.backgroundColor = "black";
+                    document.getElementById("status").style.color = "white";
+                    document.getElementById("status").innerText = "LUZ DESLIGADA! ✋";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

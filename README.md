@@ -19,6 +19,7 @@ TensorFlow.js: Biblioteca utilizada para carregar e rodar o modelo de aprendizad
 Teachable Machine: Ferramenta utilizada para treinar o modelo de classificação de imagem.
 
 📦 Como rodar o projeto
+
 Clone ou copie o código do arquivo index.html.
 
 Abra o arquivo em qualquer navegador moderno (Chrome, Edge, Firefox).
